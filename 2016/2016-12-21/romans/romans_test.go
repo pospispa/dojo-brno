@@ -1,8 +1,6 @@
 package romans
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestToInt(t *testing.T) {
 	tests := []struct {
@@ -50,6 +48,20 @@ func TestToIntBadInput(t *testing.T) {
 		_, err := ToInt(in)
 		if err != ErrInvalid {
 			t.Errorf("ToInt(%q): err = %v, want %v", in, err, ErrInvalid)
+		}
+	}
+}
+
+func BenchmarkRomans(b *testing.B) {
+	numerals := []string{
+		"MMMCCCXXXIII",
+		"MDCLXVI",
+		"CDXLIV",
+		"CMXCIX",
+	}
+	for i := 0; i < b.N; i++ {
+		for _, numeral := range numerals {
+			ToInt(numeral)
 		}
 	}
 }
