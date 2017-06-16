@@ -27,8 +27,9 @@ type ExportLocation struct {
 Rules for choosing the ExportLocation:
 
 1. shareID == ShareInstanceID
-2. IsAdminOnly == false
-3. Preferred == true are preferred over Preferred == false
-4. Locations with lower slice index are preferred over locations with higher slice index
+2. Path is not empty, i.e. is not an empty string or does not contain spaces and tabs only
+3. IsAdminOnly == false
+4. Preferred == true are preferred over Preferred == false
+5. Locations with lower slice index are preferred over locations with higher slice index
 
 In case no location complies with the above rules an error is returned.

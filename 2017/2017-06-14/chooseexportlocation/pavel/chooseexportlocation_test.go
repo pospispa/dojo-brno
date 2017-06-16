@@ -5,120 +5,140 @@ import (
 	"testing"
 )
 
+const (
+	validPath              = "ip://directory"
+	preferredPath          = "ip://preferred/directory"
+	emptyPath              = ""
+	spacesOnlyPath         = "  	  "
+	shareExportLocationID1 = "123456-1"
+	shareExportLocationID2 = "1234567-1"
+	shareExportLocationID3 = "1234567-2"
+	shareExportLocationID4 = "7654321-1"
+	shareID1               = "123456"
+	shareID2               = "1234567"
+	shareID3               = "765321"
+	shareID4               = "654321"
+)
+
 func TestChooseExportLocationSuccess(t *testing.T) {
 	tests := []struct {
-		locs    []ExportLocation
-		shareID string
-		want    ExportLocation
+		testCaseName string
+		locs         []ExportLocation
+		shareID      string
+		want         ExportLocation
 	}{
 		{
+			testCaseName: "Match first item:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "123456",
+					Path:            validPath,
+					ShareInstanceID: shareID1,
 					IsAdminOnly:     false,
-					ID:              "123456-1",
+					ID:              shareExportLocationID1,
 					Preferred:       false,
 				},
 			},
-			shareID: "123456",
+			shareID: shareID1,
 			want: ExportLocation{
-				Path:            "ip://directory",
-				ShareInstanceID: "123456",
+				Path:            validPath,
+				ShareInstanceID: shareID1,
 				IsAdminOnly:     false,
-				ID:              "123456-1",
+				ID:              shareExportLocationID1,
 				Preferred:       false,
 			},
 		},
 		{
+			testCaseName: "Match second item:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "765321",
+					Path:            validPath,
+					ShareInstanceID: shareID3,
 					IsAdminOnly:     false,
-					ID:              "7654321-1",
+					ID:              shareExportLocationID4,
 					Preferred:       false,
 				},
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "1234567",
+					Path:            validPath,
+					ShareInstanceID: shareID2,
 					IsAdminOnly:     false,
-					ID:              "1234567-1",
+					ID:              shareExportLocationID2,
 					Preferred:       false,
 				},
 			},
-			shareID: "1234567",
+			shareID: shareID2,
 			want: ExportLocation{
-				Path:            "ip://directory",
-				ShareInstanceID: "1234567",
+				Path:            validPath,
+				ShareInstanceID: shareID2,
 				IsAdminOnly:     false,
-				ID:              "1234567-1",
+				ID:              shareExportLocationID2,
 				Preferred:       false,
 			},
 		},
 		{
+			testCaseName: "Match preferred location:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "765321",
+					Path:            validPath,
+					ShareInstanceID: shareID3,
 					IsAdminOnly:     false,
-					ID:              "7654321-1",
+					ID:              shareExportLocationID4,
 					Preferred:       false,
 				},
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "1234567",
+					Path:            validPath,
+					ShareInstanceID: shareID2,
 					IsAdminOnly:     false,
-					ID:              "1234567-1",
+					ID:              shareExportLocationID2,
 					Preferred:       false,
 				},
 				{
-					Path:            "ip://preferred/directory",
-					ShareInstanceID: "1234567",
+					Path:            preferredPath,
+					ShareInstanceID: shareID2,
 					IsAdminOnly:     false,
-					ID:              "1234567-2",
+					ID:              shareExportLocationID3,
 					Preferred:       true,
 				},
 			},
-			shareID: "1234567",
+			shareID: shareID2,
 			want: ExportLocation{
-				Path:            "ip://preferred/directory",
-				ShareInstanceID: "1234567",
+				Path:            preferredPath,
+				ShareInstanceID: shareID2,
 				IsAdminOnly:     false,
-				ID:              "1234567-2",
+				ID:              shareExportLocationID3,
 				Preferred:       true,
 			},
 		},
 		{
+			testCaseName: "Match first not-preferred location that matches shareID:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "765321",
+					Path:            validPath,
+					ShareInstanceID: shareID3,
 					IsAdminOnly:     false,
-					ID:              "7654321-1",
+					ID:              shareExportLocationID4,
 					Preferred:       false,
 				},
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "1234567",
+					Path:            validPath,
+					ShareInstanceID: shareID2,
 					IsAdminOnly:     false,
-					ID:              "1234567-1",
+					ID:              shareExportLocationID2,
 					Preferred:       false,
 				},
 				{
-					Path:            "ip://preferred/directory",
-					ShareInstanceID: "1234567",
+					Path:            preferredPath,
+					ShareInstanceID: shareID2,
 					IsAdminOnly:     false,
-					ID:              "1234567-2",
+					ID:              shareExportLocationID3,
 					Preferred:       false,
 				},
 			},
-			shareID: "1234567",
+			shareID: shareID2,
 			want: ExportLocation{
-				Path:            "ip://directory",
-				ShareInstanceID: "1234567",
+				Path:            validPath,
+				ShareInstanceID: shareID2,
 				IsAdminOnly:     false,
-				ID:              "1234567-1",
+				ID:              shareExportLocationID2,
 				Preferred:       false,
 			},
 		},
@@ -126,74 +146,132 @@ func TestChooseExportLocationSuccess(t *testing.T) {
 
 	for _, tt := range tests {
 		if got, err := ChooseExportLocation(tt.locs, tt.shareID); err != nil {
-			t.Errorf("ChooseExportLocation(%v, %q) = (%v, %q) want (%v, nil)", tt.locs, tt.shareID, got, err.Error(), tt.want)
+			t.Errorf("%q ChooseExportLocation(%v, %q) = (%v, %q) want (%v, nil)", tt.testCaseName, tt.locs, tt.shareID, got, err.Error(), tt.want)
 		} else if !reflect.DeepEqual(tt.want, got) {
-			t.Errorf("ChooseExportLocation(%v, %q) = (%v, nil) want (%v, nil)", tt.locs, tt.shareID, got, tt.want)
+			t.Errorf("%q ChooseExportLocation(%v, %q) = (%v, nil) want (%v, nil)", tt.testCaseName, tt.locs, tt.shareID, got, tt.want)
 		}
 	}
 }
 
 func TestChooseExportLocationNotFound(t *testing.T) {
 	tests := []struct {
-		locs    []ExportLocation
-		shareID string
+		testCaseName string
+		locs         []ExportLocation
+		shareID      string
 	}{
 		{
-			locs:    []ExportLocation{},
-			shareID: "123456",
+			testCaseName: "Empty slice:",
+			locs:         []ExportLocation{},
+			shareID:      shareID1,
 		},
 		{
+			testCaseName: "shareID doesn't match:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "123456",
+					Path:            validPath,
+					ShareInstanceID: shareID1,
 					IsAdminOnly:     false,
-					ID:              "123456-1",
+					ID:              shareExportLocationID1,
 					Preferred:       false,
 				},
 			},
-			shareID: "654321",
+			shareID: shareID4,
 		},
 		{
+			testCaseName: "Locations for admins only:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "123456",
+					Path:            validPath,
+					ShareInstanceID: shareID1,
 					IsAdminOnly:     true,
-					ID:              "123456-1",
+					ID:              shareExportLocationID1,
 					Preferred:       false,
 				},
 			},
-			shareID: "123456",
+			shareID: shareID1,
 		},
 		{
+			testCaseName: "Preferred locations for admins only:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "123456",
+					Path:            validPath,
+					ShareInstanceID: shareID1,
 					IsAdminOnly:     true,
-					ID:              "123456-1",
+					ID:              shareExportLocationID1,
 					Preferred:       true,
 				},
 			},
-			shareID: "123456",
+			shareID: shareID1,
 		},
 		{
+			testCaseName: "Preferred location only, but shareID doesn't match:",
 			locs: []ExportLocation{
 				{
-					Path:            "ip://directory",
-					ShareInstanceID: "123456",
+					Path:            validPath,
+					ShareInstanceID: shareID1,
 					IsAdminOnly:     false,
-					ID:              "123456-1",
+					ID:              shareExportLocationID1,
 					Preferred:       true,
 				},
 			},
-			shareID: "654321",
+			shareID: shareID4,
+		},
+		{
+			testCaseName: "Empty path:",
+			locs: []ExportLocation{
+				{
+					Path:            emptyPath,
+					ShareInstanceID: shareID1,
+					IsAdminOnly:     false,
+					ID:              shareExportLocationID1,
+					Preferred:       false,
+				},
+			},
+			shareID: shareID1,
+		},
+		{
+			testCaseName: "Empty path in preferred location:",
+			locs: []ExportLocation{
+				{
+					Path:            emptyPath,
+					ShareInstanceID: shareID1,
+					IsAdminOnly:     false,
+					ID:              shareExportLocationID1,
+					Preferred:       true,
+				},
+			},
+			shareID: shareID1,
+		},
+		{
+			testCaseName: "Path containing spaces only:",
+			locs: []ExportLocation{
+				{
+					Path:            spacesOnlyPath,
+					ShareInstanceID: shareID1,
+					IsAdminOnly:     false,
+					ID:              shareExportLocationID1,
+					Preferred:       false,
+				},
+			},
+			shareID: shareID1,
+		},
+		{
+			testCaseName: "Preferred path containing spaces only:",
+			locs: []ExportLocation{
+				{
+					Path:            spacesOnlyPath,
+					ShareInstanceID: shareID1,
+					IsAdminOnly:     false,
+					ID:              shareExportLocationID1,
+					Preferred:       true,
+				},
+			},
+			shareID: shareID1,
 		},
 	}
 	for _, tt := range tests {
 		if got, err := ChooseExportLocation(tt.locs, tt.shareID); err == nil {
-			t.Errorf("ChooseExportLocation(%v, %q) = (%v, nil) want (\"N/A\", \"an error\")", tt.locs, tt.shareID, got)
+			t.Errorf("%q ChooseExportLocation(%v, %q) = (%v, nil) want (\"N/A\", \"an error\")", tt.testCaseName, tt.locs, tt.shareID, got)
 		}
 	}
 }

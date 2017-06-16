@@ -1,6 +1,9 @@
 package chooseexportlocation
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // ExportLocation see OpenStack Shares, Export Locations
 type ExportLocation struct {
@@ -25,10 +28,13 @@ func ChooseExportLocation(locs []ExportLocation, shareID string) (ExportLocation
 	foundMatchingNotPreferred := false
 	var matchingNotPreferred ExportLocation
 	for _, loc := range locs {
-		if !loc.IsAdminOnly && loc.ShareInstanceID == shareID && loc.Preferred {
+		if loc.IsAdminOnly || loc.ShareInstanceID != shareID || strings.TrimSpace(loc.Path) == "" {
+			continue
+		}
+		if loc.Preferred {
 			return loc, nil
 		}
-		if !loc.IsAdminOnly && !foundMatchingNotPreferred && loc.ShareInstanceID == shareID {
+		if !foundMatchingNotPreferred {
 			matchingNotPreferred = loc
 			foundMatchingNotPreferred = true
 		}
